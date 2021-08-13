@@ -1,0 +1,18 @@
+package: whoami
+working_dir: '.'
+output_dir: '.'
+report_rmd_name: validation.Rmd
+report_naming_format: Validation_Report_{package}_v{version}_{date}
+usernames:
+  user_b:
+    name: Val A Dashun
+    title: Programmer II
+    role: tester
+  ehhughes:
+    name: Ellis Hughes
+    title: Programmer
+    role: Validation Lead, Lead Programmer
+validation_files:
+- example_req_01.md
+- example_test_case_01.md
+- example_test_code_001.R

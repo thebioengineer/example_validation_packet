@@ -1,0 +1,55 @@
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+
+name: valtools_ci
+
+jobs:
+  valtools_ci:
+    runs-on: ubuntu-20.04
+    env:
+      RSPM: https://packagemanager.rstudio.com/cran/__linux__/bionic/latest
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: r-lib/actions/setup-r@v1
+        id: install-r
+
+      - uses: r-lib/actions/setup-tinytex@v1
+      - run: tlmgr --version
+      - run: tlmgr update -self
+      - run: tlmgr install multirow
+
+      - uses: r-lib/actions/setup-pandoc@master
+        with:
+          pandoc-version: '2.7.3'
+
+      - name: Install pak
+        run: |
+          install.packages("pak", repos = "https://r-lib.github.io/p/pak/dev/")
+        shell: Rscript {0}
+
+      - name: Install valtools and dependencies
+        run: |
+          pak::pkg_install("phuse-org/valtools", dependencies = TRUE)
+        shell: Rscript {0}
+
+      - name: Install Create validation Report
+        run: |
+          report_path <- valtools::vt_validate_report()
+          dir.create(".reports", showWarnings = FALSE)
+          file.rename(from = report_path, to = file.path(".reports", basename(report_path)))
+        shell: Rscript {0}
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: valtools-report-artifact
+          path: .reports/
